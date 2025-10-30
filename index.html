@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Focal Point</title>
+    <meta name="description" content="Manage tasks from work to play. Break down steps, due dates, reminders, calendar view, and recurring tasks." />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <button id="navToggle" aria-label="Toggle sidebar" class="icon-btn" title="Toggle sidebar">☰</button>
+        <h1>Focal Point</h1>
+      </div>
+      <div class="header-actions">
+        <input id="searchInput" class="search" type="search" placeholder="Search tasks…" aria-label="Search tasks" />
+        <button id="newTaskBtn" class="primary">New Task</button>
+        <button id="installBtn" class="secondary" hidden>Install</button>
+        <button id="notifBtn" class="secondary">Enable Reminders</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside id="sidebar" class="sidebar">
+        <nav class="nav">
+          <button data-view="inbox" class="nav-item active">All</button>
+          <button data-view="today" class="nav-item">Today</button>
+          <button data-view="upcoming" class="nav-item">Upcoming</button>
+          <button data-view="calendar" class="nav-item">Calendar</button>
+        </nav>
+        <section class="filters">
+          <div class="filters-header">
+            <h2>Filters</h2>
+            <button id="addFilterBtn" class="icon-btn" title="Add custom filter">＋</button>
+          </div>
+          <ul id="filtersList" class="filters-list" aria-label="Saved filters"></ul>
+          <div class="divider"></div>
+          <h2>Tags</h2>
+          <div id="tagsCloud" class="tags-cloud"></div>
+        </section>
+        <section class="lists">
+          <h2>Lists</h2>
+          <ul class="lists-list">
+            <li><button class="nav-item" data-view="daily">Daily Checklist</button></li>
+            <li><button class="nav-item" data-view="weekly">Weekly Plan</button></li>
+          </ul>
+        </section>
+        <section class="io">
+          <button id="exportBtn" class="secondary">Export</button>
+          <label class="import">
+            <input id="importInput" type="file" accept="application/json" hidden />
+            <span class="secondary">Import</span>
+          </label>
+        </section>
+      </aside>
+
+      <section class="content">
+        <header class="content-header">
+          <h2 id="viewTitle">All Tasks</h2>
+          <div class="sort-controls">
+            <label>
+              Sort by
+              <select id="sortSelect">
+                <option value="priority">Priority</option>
+                <option value="due">Due date</option>
+                <option value="created">Created</option>
+                <option value="title">Title</option>
+              </select>
+            </label>
+          </div>
+        </header>
+
+        <div id="calendarView" class="calendar hidden" aria-hidden="true"></div>
+
+        <ul id="taskList" class="task-list"></ul>
+      </section>
+
+      <aside id="details" class="details" aria-live="polite" aria-label="Task details" hidden>
+        <header class="details-header">
+          <h2>Task</h2>
+          <button id="closeDetailsBtn" class="icon-btn" title="Close">✕</button>
+        </header>
+        <form id="taskForm" class="task-form">
+          <input id="taskTitle" type="text" placeholder="Task title" required />
+          <textarea id="taskNotes" placeholder="Notes (optional)"></textarea>
+          <div class="row">
+            <label>Due
+              <input id="taskDue" type="datetime-local" />
+            </label>
+            <label>Priority
+              <select id="taskPriority">
+                <option value="3">Low</option>
+                <option value="2">Medium</option>
+                <option value="1">High</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Tags
+              <input id="taskTags" type="text" placeholder="e.g. work, health" />
+            </label>
+            <label>List
+              <select id="taskList">
+                <option value="none">None</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="subtasks">
+            <legend>Steps</legend>
+            <ul id="subtasksList" class="subtasks-list"></ul>
+            <div class="subtasks-add">
+              <input id="newSubtaskInput" type="text" placeholder="New step" />
+              <button id="addSubtaskBtn" type="button" class="secondary">Add step</button>
+            </div>
+          </fieldset>
+          <fieldset class="recurrence">
+            <legend>Repeat</legend>
+            <label>
+              <select id="taskRepeat">
+                <option value="none">Does not repeat</option>
+                <option value="daily">Daily</option>
+                <option value="weekdays">Weekdays</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="custom">Custom…</option>
+              </select>
+            </label>
+            <input id="taskRepeatCustom" class="hidden" type="text" placeholder="RRULE like FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE" />
+          </fieldset>
+          <fieldset class="reminder">
+            <legend>Reminder</legend>
+            <label>
+              <input id="taskRemind" type="checkbox" /> Set reminder
+            </label>
+            <label>
+              <input id="taskRemindMinutes" type="number" min="0" step="5" value="15" /> minutes before
+            </label>
+          </fieldset>
+          <div class="form-actions">
+            <button id="saveTaskBtn" class="primary" type="submit">Save</button>
+            <button id="deleteTaskBtn" class="danger" type="button">Delete</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+
+    <template id="taskItemTemplate">
+      <li class="task-item">
+        <label class="checkbox">
+          <input type="checkbox" class="task-complete" />
+          <span class="check"></span>
+        </label>
+        <div class="task-main">
+          <div class="task-title-line">
+            <span class="task-title"></span>
+            <span class="task-badges"></span>
+          </div>
+          <div class="task-meta"></div>
+        </div>
+        <button class="icon-btn more" title="More">⋯</button>
+      </li>
+    </template>
+
+    <script src="app.js?v=2" type="module"></script>
+  </body>
+  </html>
+
+
